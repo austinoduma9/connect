@@ -15,6 +15,9 @@ import os
 
 import dj_database_url
 
+import sys
+print(f"Python version: {sys.version}")
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,7 +32,7 @@ SECRET_KEY = 'django-insecure-bu-u^(x&*qllbv-@16pwnweq$^j5qv#gwb$@3t2@rnvv2hu5o-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '0.0.0.0', 'connect.onrender.com']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '0.0.0.0', 'connect.onrender.com', 'connect-j2bu.onrender.com']
 
 
 

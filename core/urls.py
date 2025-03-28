@@ -14,15 +14,11 @@ from .views import user_posts
 from django.conf.urls.static import static
 from django.conf import settings
 
-
 from .views import post_list 
 
 from .views import contact
 
-
 from django.views.generic import TemplateView
-
-
 
 urlpatterns = [
 
