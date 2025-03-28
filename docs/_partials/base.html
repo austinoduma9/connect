@@ -33,12 +33,9 @@
     <div class="container">
       {% if not hide_navbar %}
         {% include '_partials/navbar.html' %}
-
         <header>
           <h1>{{ page_name }}</h1>  <!-- Dynamic Page Name -->
-
         </header>
-
       {% endif %}
 
       {% block content %}
