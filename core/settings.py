@@ -32,7 +32,7 @@ SECRET_KEY = 'django-insecure-bu-u^(x&*qllbv-@16pwnweq$^j5qv#gwb$@3t2@rnvv2hu5o-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '0.0.0.0', 'connect.onrender.com', 'connect-j2bu.onrender.com']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '0.0.0.0', 'connect.onrender.com', 'connect-j2bu.onrender.com', 'connect-ihni.onrender.com']
 
 
 
