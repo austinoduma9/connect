@@ -1,0 +1,96 @@
+{% load static %}
+<head>
+<link rel="stylesheet" href="Styles/styles.css">
+<link rel="stylesheet" href="Styles/styles2.css">
+<link rel="stylesheet" href="Styles/screen_m.css">
+<script src="head_type.js"></script>
+
+
+<script src="script.js"></script>
+<div id="button_scripts"></div>
+<span id="head"></span>
+
+</head>
+<header class="header-section">
+    <div class="nav-bar">
+        <div class="logo-section btn"  >
+                <img onclick="window.location.href='/'" src="{% static 'images/OdumaCorp-icon-small.png' %}" alt="company-icon">
+                <!-- <img src="images/icons8-menu-96.png" alt="" srcset=""> -->
+                <span>Oduma Corp</span>
+            </div>
+            <!-- <div class="menu-btn btn">
+                <img src="{% static 'images/icons8-menu-96.png' %}" alt="" srcset="">
+            </div> -->
+                <nav>
+                    <ul>
+                        <li>
+                            <a href="/">Home</a>
+                            <a href="{% url 'about' %}">About</a>
+                            <a href="{% url 'services' %}">Services</a>
+                            <a href="{% url 'events' %}">News/Events</a>
+                            <a href="{% url 'jobs' %}">Jobs</a>
+                            {% if user.is_authenticated %}
+                                <a href="{% url 'app' %}">App</a>
+                            {% endif %}
+                            {% if user.is_authenticated %}
+                            <a href="{% url 'messages' %}">Messages</a>
+                            {% endif %}
+                            {% if user.is_authenticated %}
+                            <a href="{% url 'notifications' %}">Notification</a>
+                            {% endif %}
+                            {% if user.is_authenticated %}
+                            <a href="{% url 'dashboard' %}">Dashboard</a>
+                            {% endif %}
+                            {% if user.is_authenticated %}
+                            <a href="{% url 'networks' %}">My Network</a>
+                            {% endif %}
+
+                        </li>
+                    </ul>
+                </nav>
+        </div>
+        <div class="btns">
+            <div class="buttons">
+                {% if user.is_authenticated %}
+                    <button  onclick="window.location.href='{% url 'logout'%}'">Logout</button>
+                    <!-- <li class="nav-item"><a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'profile' user.username %}">Profile</a></li>
+                    <li class="nav-item"><a class="nav-link text-danger" href="{% url 'logout' %}">Logout</a></li> -->
+                {% else %}
+                            <button  onclick="window.location.href='{% url 'register'%}'">Register</button>
+                            <button  onclick="window.location.href='{% url 'login'%}'">Login</button>
+                {% endif %}
+                 <button onclick="history.back()">Back</button>
+            </div>
+                    
+        </div>
+            <!-- buttons -->
+            {% if user.is_authenticated %}
+            <div class="actions">
+                <button type="button" class="btn" onclick="window.location.href='{% url 'user_posts' %}'">My Post</button>
+                <button type="button" class="btn" onclick="window.location.href='{% url 'create_post' %}'">Make Post</button>
+                <button type="button" class="btn" onclick="window.location.href='{% url 'proposals' %}'">Proposals</button>
+            </div>
+            {% endif %}
+
+    </div>
+       <!-- search bar -->
+       <div class="search">
+        <div class="in-search">
+            <!-- <input id="search-area" placeholder="Search Field"></input> -->
+            
+            <!-- <button  type="button">Search </button> -->
+            <!-- <a href=""><img src="{% static 'images/icons8-search-50.png' %}'" alt="search" srcset=""></a> -->
+            <!-- <img src="{% static 'images/icons8-search-48.png' %}'" alt="" srcset=""> -->
+            
+            <form action="{% url 'search' %}" method="GET" class="search-form">
+                <input type="text" name="q" placeholder="Search..." required>
+                <button type="submit">🔍</button>
+            </form>
+            
+
+        </div>
+     </div>    
+</header>
+
+    

@@ -1,0 +1,287 @@
+
+
+{% extends '_partials/base.html'  %} 
+
+{% load static %} 
+
+{% block title %}Welcome to OdumaCorp{% endblock %}
+
+
+{% block content %}
+
+    <!-- sections -->
+    <section class="container">
+        <!-- mid-section -->
+        <section id="mid">
+            <!-- left-side -->
+             <div class="left section">
+                <div class="user-section">
+                    <img src="{{ profile.profile_pics.url }}" alt="Profile Image" class="rounded-circle" width="100" height="auto">
+
+                    <div>
+                        <div class="user-name">
+                            <p>Name:<h4>{{ user.get_full_name }}</h4>
+                            </p>
+                            <button>
+                                <a href="{% url 'edit_profile' %}" class="btn btn-primary btn-sm">Edit</a>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="user-about"><span>ABOUT:
+                    </span>{{ profile.bio|truncatewords:20 }}
+                </div>
+                <div class="user-info">
+                    <ul>
+                        <li>Profile views: {{ profile_views }}</li>
+                        <li>Connections: {{ connections_count }}</li>
+                        <li>Inventions: {{ inventions_count }}</li>
+                        <li>Patents: {{ patents_count }}</li>
+                        <li>Groups: {{ groups_count }}</li>
+                        <li>Pages: {{ pages_count }}</li>
+                        <li>Events: {{ events_count }}</li>
+                    </ul>
+                </div>
+                <div class="more-user-info">
+                    <p><strong>Company:</strong> {{ profile.company }}</p>
+                    <p><strong>Industry:</strong> {{ profile.industry }}</p>
+                </div>
+             </div>
+
+
+
+            
+            <!-- center-part -->
+            <!-- Post Submission Form -->
+            <div class="center section">
+                <div class="post-section card">
+                    <form method="POST" action="{% url 'create_post' %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <textarea name="content" placeholder="Post here..."></textarea>
+                        <span>Industry:</span>
+                        <select name="industry" id="industry">
+                            <option value="IT">IT</option>
+                            <option value="Medicine">Medicine</option>
+                            <option value="Finance">Finance</option>
+                            <option value="Business">Business</option>
+                            <option value="Arts">Arts</option>
+                            <option value="Agriculture">Agriculture</option>
+                        </select>
+                        <input type="file" name="attachment">
+                        <button type="submit">Submit</button>
+                    </form>
+
+                </div>
+                <!-- Display Posts -->
+                {% for post in posts %}
+                <div class="idea-section card">
+                     <div class="top">
+                         <span>
+                             <button>...</button>
+                             <button>X</button>
+                         </span>
+                     </div>
+                     <div class="idea-info">
+                         
+                         <table>
+                             <tr>
+                                 <td>Connected 
+                                    <span id="status">
+                                        {% for user in users %}
+                                            <div class="user">
+                                                <p>{{ user.username }}</p>
+                                                {% if user in request.user.following.all %}
+                                                <span class="following-dot"></span>
+                                                {% else %}
+                                                    <button class="not-following-button">Not Following</button>
+                                                    {% endif %}
+                                            </div>
+                                        {% endfor %}
+                                        
+                                    </span>
+                                </td>
+                                <td>
+                                    <p><strong>{{ post.user.get_full_name }}</strong></p>
+                                    
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <p><strong>Industry:</strong> {{ post.industry }}</p>
+                                </td>
+                                <td>
+                                    <p>{{ post.created_at|timesince }} ago</p>
+                                </td>
+                            </tr>
+                        </table>
+    
+                        <div class="idea-body">
+                            <span>Title1</span>
+                            <div class="idea-def">
+                                <p>{{ post.content }}</p>
+                                
+                            </div>
+                            <div class="interest-section">
+                                <span>Interests #</span>
+                                <span>Views #</span>
+                                <span>Repost #</span>
+                                <span>Likes #</span>
+    
+                            </div>
+                        </div>
+                        <div class="idea-media-section">
+                            {% if post.image %}
+                                <img src="{{ post.image.url }}" class="post-image">
+                            {% endif %}
+    
+                        </div>
+                        <div class="action-area">
+                            <div class="idea-action1 small-card">
+                                <div class="area">
+                                    <span>Collaborations #</span>
+                                    <span>Proposal #</span>
+                                    <span>Pantent</span>
+                                </div>
+                                <div class="comment-section small-card">
+    
+                            </div>
+                            <!-- Comments Section -->
+                            <div class="comment-section small-card">
+                                <!-- <p><strong>Comments [Auto Scroll]</strong></p> -->
+                                <span>Comments # [Auto Scroll]</span>
+    
+                                {% for comment in post.comments.all %}
+                                    <p><strong>{{ comment.user.username }}</strong>: {{ comment.content }}</p>
+                                {% empty %}
+                                    <p>No comments yet.</p>
+                                {% endfor %}
+    
+                                <!-- Comment Form -->
+                                <form method="POST" action="{% url 'add_comment' post.id %}">
+                                    {% csrf_token %}
+                                    <input type="text" name="content" placeholder="comment here...">
+                                    <button type="submit">Make Comment</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                    <p>No posts available.</p>
+                {% endfor %}
+
+                <div class="that-viewed">
+                    <h3>Who viewed your Profile</h3>
+                    <div class="title-container">
+                        <div class="tile">
+                            {% for view in recent_viewers %}
+                            <div class="viewer-card">
+                                <img src="{{ view.viewer.profile.image.url }}" alt="Profile Picture">
+                                <span>
+                                    <strong>{{ view.viewer.first_name }} {{ view.viewer.last_name }}</strong>
+    
+                                </span>
+                                <div class="tiles-about">
+                                    <p>{{ view.viewer.profile.bio|truncatewords:10 }}</p>
+    
+                                </div>
+                                
+                                <button>
+                                    <a href="{% url 'profile_view' view.viewer.username %}" class="connect-btn">Connect +</a>
+    
+                                </button>
+                            </div>
+                            {% empty %}
+                            <p>No recent profile viewers.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                <div class="suggestions-section card">
+                     <!-- Include Suggestions Section -->
+                        {% include '_partials/suggestions.html' %}
+    
+                </div>
+            </div>
+
+            </div>
+            <div class="right section">
+                <span>Proposals</span>
+                <hr>
+                <div class="proposal-section">
+                    {% for proposal in proposals %}
+                    <div class="tile">
+                        <div class="info">
+                            <img src="{{ proposal.image.url }}" alt="Proposal Image" class="proposal-image">
+                            <strong>{{ proposal.investor.get_full_name }}</strong>
+
+                        </div>
+                        <div class="titles-about">
+                            <p><strong>About:</strong> {{ proposal.about|truncatewords:15 }}</p>
+    
+                        </div>
+                        <div class="interest-section">
+                            <span>Interests: {{ proposal.interests }}</span>
+                            <span>Views: {{ proposal.views }}</span>
+                            <span>Reposts: {{ proposal.reposts }}</span>
+                            <span>Likes: {{ proposal.likes }}</span>
+                        </div>
+                        <div class="action-section">
+                            <button class="btn btn-primary">Reply</button>
+                            <button class="btn btn-secondary">Attach</button>
+                            <select class="status-dropdown">
+                                <option value="on-hold">On-hold</option>
+                                <option value="accept">Accept</option>
+                                <option value="counter">Counter</option>
+                                <option value="request-details">Request details</option>
+                            </select>
+    
+                        </div>
+                    </div>
+                    {% empty %}
+                        <p>No proposals available.</p>
+                    {% endfor %}
+                    
+                </div>
+                
+
+                <span>Proposals</span>
+                <hr>
+                <div class="proposal-section">
+                    <div class="tile">
+                        <div class="info">
+                            <img src="{% static 'images/iamger5.jpg' %}" alt="profile-icon" srcset="">
+                            <span>Investor 1</span>
+                        </div>
+                        <div class="titles-about"><span>About:</span>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Provident, culpa.
+                        </div>
+                        <div class="interest-section">
+                            <span>Interests #</span>
+                            <span>Views #</span>
+                            <span>Repost #</span>
+                            <span>Likes #</span>
+                        </div>
+                        <div class="action-section">
+                            <button type="button">Reply</button>
+                            <button type="button">Attach</button>
+                            <select name="" id="">
+                                <option value="On Hold">On Hold</option>
+                                <option value="Accept">Accept</option>
+                                <option value="Counter">Counter</option>
+                                <option value="Request details">Request details</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </section>
+
+<div id="footer"></div>
+
+</body>
+
+
+</html>
+
+{%endblock content%}

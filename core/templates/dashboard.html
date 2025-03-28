@@ -1,0 +1,44 @@
+{% extends '_partials/base.html' %}
+
+{% load static %} 
+<body>
+    
+
+    {% block content %}
+    
+    <h3 class="mt-4">Welcome, {{ user.username }}!</h3>
+        
+    <!-- User's Ideas -->
+    <h5 class="mt-3">Your Ideas</h5>
+    {% if user_ideas %}
+        <ul class="list-group">
+            {% for idea in user_ideas %}
+                <li class="list-group-item">
+                    <strong>{{ idea.title }}</strong> - {{ idea.category }} <br>
+                    {{ idea.description }} <br>
+                    <small class="text-muted">Posted on {{ idea.created_at|date:"M d, Y" }}</small>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>You haven't submitted any ideas yet.</p>
+    {% endif %}
+
+    <!-- Upcoming Events -->
+    <h5 class="mt-4">Upcoming Events</h5>
+    {% if events %}
+        <ul class="list-group">
+            {% for event in events %}
+                <li class="list-group-item">
+                    <strong>{{ event.name }}</strong> - {{ event.location }} <br>
+                    <small class="text-muted">Date: {{ event.date|date:"M d, Y" }}</small>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No upcoming events.</p>
+    {% endif %}
+
+    {% endblock %}
+
+</body>
