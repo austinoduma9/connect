@@ -1,0 +1,101 @@
+<div class="suggestions-section card">
+    <div class="top-section">
+        <div class="left-section">
+            <span class="head">
+                <h3>Node Suggestions</h3>
+            </span>
+            <div class="tile-container">
+                <div class="tile">
+                    {% for user in node_suggestions %}
+                    <div class="suggestion-card">
+                        <img src="{{ user.profile.image.url }}" alt="Profile" class="icon">
+                        <span>
+                            <p><strong>{{ user.first_name }} {{ user.last_name }}</strong></p>
+                        </span>
+                        <div class="tiles-about">
+                            <p>{{ user.profile.bio|truncatewords:10 }}</p>
+                        </div>
+                        <button>
+                            <a href="{% url 'profile_view' user.username %}" class="connect-btn">Connect +</a>
+
+                        </button>
+                    </div>
+                    {% endfor %}
+
+                </div>
+            </div>
+        </div>
+        <div class="right-section">
+            <span class="head">
+                <h3>Companies to Look At</h3>
+
+            </span>
+            <div class="tile-container">
+                {% for company in companies %}
+                <div class="tile">
+                    <img src="{{ company.logo.url }}" alt="Company Logo" class="icon">
+                    <span>
+                        <p><strong>{{ company.name }}</strong></p>
+                    </span>
+                    <div class="titles-about">
+                        <p>{{ company.description|truncatewords:10 }}</p>
+
+                    </div>
+                    <button>
+                        <a href="#" class="connect-btn">Connect +</a>
+                    </button>
+                </div>
+                {% endfor %}
+
+            </div>
+        </div>
+    </div>
+    <div class="bottom-section">
+        <div class="left-section">
+            <span class="head">
+                <h3>Nodes in Your Community</h3>
+                <div class="tile-container">
+                    {% for user in community_nodes %}
+                    <div class="tile">
+                        <img src="{{ user.profile.image.url }}" alt="Profile" class="icon">
+                        <div>
+                            <span>
+                                <strong>{{ user.first_name }} {{ user.last_name }}</strong>
+                            </span>
+                            <div class="titles-about">
+                                <p>{{ user.profile.bio|truncatewords:10 }}</p>
+                            </div>
+                            <button>
+                                <a href="{% url 'profile_view' user.username %}" class="connect-btn">Connect +</a>
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </span>
+        </div>
+        <div class="right-section">
+            <span class="head">
+                <h3>Based on Your Profile</h3>
+            </span>
+            {% for company in profile_based_companies %}
+            <div class="tile-container">
+                <div class="tile">
+                    <img src="{{ company.logo.url }}" alt="Company Logo">
+                    <div>
+                        <strong>{{ company.name }}</strong>
+                        <div class="titles-about">
+                            <p>{{ company.description|truncatewords:10 }}</p>
+                        </div>
+                        <button>
+                            <a href="#" class="connect-btn">Connect +</a>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+ 
+
+</div>

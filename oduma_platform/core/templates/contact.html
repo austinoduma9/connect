@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section>
+    <h2>Get in Touch</h2>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <p class="{{ message.tags }}">{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+    
+    <form method="post">
+        {% csrf_token %}
+        <label for="id_name">Name:</label>
+        {{ form.name }}
+        
+        <label for="id_email">Email:</label>
+        {{ form.email }}
+        
+        <label for="id_message">Message:</label>
+        {{ form.message }}
+
+        <button type="submit" class="submit-button">Submit</button>
+    </form>
+</section>
+{% endblock %}
