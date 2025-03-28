@@ -30,8 +30,8 @@ urlpatterns = [
     # path("app/", app_view, name="app"),
 
 
-    # path('', views.index, name='index'),
-    path("", TemplateView.as_view(template_name="index.html"), name="home"),
+    path('', views.index, name='index'),
+    # path("", TemplateView.as_view(template_name="index.html"), name="home"),
     path('app/', views.app_view, name='app'),
     path('about/', views.about, name='about'),
     path('networks/', views.networks, name='networks'),
