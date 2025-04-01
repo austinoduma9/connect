@@ -62,7 +62,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
     'whitenoise.middleware.WhiteNoiseMiddleware',
     
     # 'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -100,28 +99,34 @@ TEMPLATES = [
 WSGI_APPLICATION = 'core.wsgi.application'
 
 
+from dotenv import load_dotenv
+
+load_dotenv() 
+
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
-    # 'default': dj_database_url.config(default='postgres://austin:WPnHyrtaq6mPjwTummEEtz4EMQtN7PON@dpg-cvj2kl6uk2gs73b0vkb0-a:5432/odumaconnect')
-    # 'default': dj_database_url.config(default='postgresql://austin:WPnHyrtaq6mPjwTummEEtz4EMQtN7PON@dpg-cvj2kl6uk2gs73b0vkb0-a.oregon-postgres.render.com:5432/odumaconnectdb')
+from decouple import config
 
-    # 'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
-    # "default": dj_database_url.config(default=os.getenv("DATABASE_URL"), engine="django.db.backends.postgresql"),
-    # "default": dj_database_url.config(
-    #     default=os.getenv("DATABASE_URL"),
-    #     engine="django.db.backends.postgresql",
-    # ),
+SECRET_KEY = config('SECRET_KEY')
+DEBUG = config('DEBUG', default=False, cast=bool)
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default="").split(",")
+
+DATABASES = {
+    
     # postgresql://austin:WPnHyrtaq6mPjwTummEEtz4EMQtN7PON@dpg-cvj2kl6uk2gs73b0vkb0-a.oregon-postgres.render.com/odumaconnectdb
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
 
-         'USER': 'austin',
-        'PASSWORD': 'L@ndM1ne',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        # 'ENGINE': 'django.db.backends.postgresql',  # Change accordingly
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST', default="localhost"),
+        'PORT': config('DB_PORT', default="5432"),
+
+         
     }
     #     'default': {
     #     'ENGINE': 'django.db.backends.postgresql',
@@ -134,6 +139,12 @@ DATABASES = {
     #     'PORT': '5432',
     # }
 }
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = config("EMAIL_HOST")
+EMAIL_PORT = config("EMAIL_PORT", cast=int)
+EMAIL_HOST_USER = config("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
+EMAIL_USE_TLS = config("EMAIL_USE_TLS", cast=bool)
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.postgresql',
@@ -205,3 +216,6 @@ LOGIN_URL = '/login/'
 LOGOUT_REDIRECT_URL = '/'
 
 
+
+ # Use an app password if using Gmail
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"

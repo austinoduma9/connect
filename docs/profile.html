@@ -1,28 +1,60 @@
 {% extends '_partials/base.html' %}
 {% block title %}{{ profile_user.username }}'s Profile | OdumaCorp{% endblock %}
+
+
 {% block content %}
-{%include '_partials/navbar.html'%}
 <h3 class="mt-4">{{ profile_user.username }}'s Profile</h3>
+
+
+<div class="container">
+    <h2>Edit Profile</h2>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Save Changes</button>
+    </form>
+</div>
+
 <p><strong>Type:</strong> {{ profile_user.get_user_type_display }}</p>
 <p><strong>Bio:</strong> {{ profile_user.bio|default:"No bio provided." }}</p>
 
 <!-- Profile Ideas -->
-<h5 class="mt-4">{{ profile_user.username }}'s Ideas</h5>
-{% if user_ideas %}
-    <ul class="list-group">
-        {% for idea in user_ideas %}
-            <li class="list-group-item">
-                <strong>{{ idea.title }}</strong> - {{ idea.category }} <br>
-                {{ idea.description }}
-            </li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <p>No ideas submitted yet.</p>
-{% endif %}
 
-{% if request.user != profile_user %}
-    <a href="{% url 'send_connection_request' profile_user.id %}" class="btn btn-primary mt-3">Connect</a>
-{% endif %}
+<div class="left section">
+    <div class="user-section">
+        <!-- <img src="{{ profile.profile_pics.url|default:'/static/images/default_profile.png' }}"  -->
+             <!-- alt="Profile Image" class="rounded-circle" width="100" height="auto"> -->
 
-{% endblock %}
+        <div>
+            <div class="user-name">
+                <p>Name:</p>
+                <h4>{{ profile.user.get_full_name|default:"Not Provided" }}</h4>
+                <button>
+                    <a href="{% url 'edit_profile' %}" class="btn btn-primary btn-sm">Edit</a>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="user-about">
+        <span>ABOUT: </span>{{ profile.bio|default:"No bio available."|truncatewords:20 }}
+    </div>
+
+    <div class="user-info">
+        <ul>
+            <li>Profile views: {{ profile_views|default:"0" }}</li>
+            <li>Inventions: {{ inventions_count|default:"0" }}</li>
+            <li>Patents: {{ patents_count|default:"0" }}</li>
+            <li>Groups: {{ groups_count|default:"0" }}</li>
+            <li>Pages: {{ pages_count|default:"0" }}</li>
+            <li>Events: {{ events_count|default:"0" }}</li>
+        </ul>
+    </div>
+
+    <div class="more-user-info">
+        <p><strong>Company:</strong> {{ profile.company|default:"Not specified" }}</p>
+        <p><strong>Industry:</strong> {{ profile.industry|default:"Not specified" }}</p>
+    </div>
+</div>
+
+{% endblock  %}

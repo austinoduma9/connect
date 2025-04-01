@@ -1,12 +1,12 @@
 {% load static %}
 <head>
-<link rel="stylesheet" href="Styles/styles.css">
-<link rel="stylesheet" href="Styles/styles2.css">
-<link rel="stylesheet" href="Styles/screen_m.css">
-<script src="head_type.js"></script>
+<!-- <link rel="stylesheet" href="css/styles.css">
+<link rel="stylesheet" href="css/styles2.css">
+<link rel="stylesheet" href="css/screen_m.css"> -->
+<!-- <script src="head_type.js"></script> -->
 
 
-<script src="script.js"></script>
+<!-- <script src="script.js"></script> -->
 <div id="button_scripts"></div>
 <span id="head"></span>
 
@@ -24,8 +24,11 @@
                 <nav>
                     <ul>
                         <li>
-                            <a href="/">Home</a>
-                            <a href="{% url 'about' %}">About</a>
+                            <a href="{% url 'app' %}">Home</a>
+                            <a href="{% url 'about' %}">About</a>                            
+                            {% if user.is_authenticated %}
+                                <a href="{% url 'inventor_page' %}">Inventors</a>
+                            {% endif %}
                             <a href="{% url 'services' %}">Services</a>
                             <a href="{% url 'events' %}">News/Events</a>
                             <a href="{% url 'jobs' %}">Jobs</a>
@@ -33,16 +36,16 @@
                                 <a href="{% url 'app' %}">App</a>
                             {% endif %}
                             {% if user.is_authenticated %}
-                            <a href="{% url 'messages' %}">Messages</a>
+                                <a href="{% url 'messages' %}">Messages</a>
                             {% endif %}
                             {% if user.is_authenticated %}
-                            <a href="{% url 'notifications' %}">Notification</a>
+                                    <a href="{% url 'notifications' %}">Notification</a>
                             {% endif %}
                             {% if user.is_authenticated %}
                             <a href="{% url 'dashboard' %}">Dashboard</a>
                             {% endif %}
                             {% if user.is_authenticated %}
-                            <a href="{% url 'networks' %}">My Network</a>
+                                <a href="{% url 'networks' %}">My Network</a>
                             {% endif %}
 
                         </li>
@@ -53,9 +56,7 @@
             <div class="buttons">
                 {% if user.is_authenticated %}
                     <button  onclick="window.location.href='{% url 'logout'%}'">Logout</button>
-                    <!-- <li class="nav-item"><a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'profile' user.username %}">Profile</a></li>
-                    <li class="nav-item"><a class="nav-link text-danger" href="{% url 'logout' %}">Logout</a></li> -->
+
                 {% else %}
                             <button  onclick="window.location.href='{% url 'register'%}'">Register</button>
                             <button  onclick="window.location.href='{% url 'login'%}'">Login</button>
@@ -65,30 +66,25 @@
                     
         </div>
             <!-- buttons -->
-            {% if user.is_authenticated %}
             <div class="actions">
-                <button type="button" class="btn" onclick="window.location.href='{% url 'user_posts' %}'">My Post</button>
-                <button type="button" class="btn" onclick="window.location.href='{% url 'create_post' %}'">Make Post</button>
-                <button type="button" class="btn" onclick="window.location.href='{% url 'proposals' %}'">Proposals</button>
+                <button type="button" class="btn" onclick="window.location.href='{% url 'post_list' %}'">My Post</button>
+                <!-- <button type="button" class="btn" onclick="window.location.href='{% url 'create_project' %}'">Make Post</button> -->
+                {#<button type="button" class="btn" onclick="window.location.href='{% url 'proposals' %}'">Proposals</button>#}
             </div>
+            {% if user.is_authenticated %}
             {% endif %}
 
     </div>
        <!-- search bar -->
        <div class="search">
         <div class="in-search">
-            <!-- <input id="search-area" placeholder="Search Field"></input> -->
-            
-            <!-- <button  type="button">Search </button> -->
-            <!-- <a href=""><img src="{% static 'images/icons8-search-50.png' %}'" alt="search" srcset=""></a> -->
-            <!-- <img src="{% static 'images/icons8-search-48.png' %}'" alt="" srcset=""> -->
-            
-            <form action="{% url 'search' %}" method="GET" class="search-form">
-                <input type="text" name="q" placeholder="Search..." required>
-                <button type="submit">🔍</button>
-            </form>
-            
 
+            <form action="{% url 'search' %}" method="GET" class="search-form">
+                <input type="text" name="q" placeholder="Search..." >
+                <button type="submit">
+                    <img src="{% static 'images/icons8-search-50.png' %}'" alt="search" srcset="">
+                </button>
+            </form>
         </div>
      </div>    
 </header>

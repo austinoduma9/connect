@@ -1,208 +1,259 @@
-
-
 {% extends '_partials/base.html'  %} 
 
 {% load static %} 
 
 {% block title %}Welcome to OdumaCorp{% endblock %}
 
-
 {% block content %}
 
     <!-- sections -->
     <section class="container">
+        
+        {% for project in projects %}
+        <div class="card mt-3">
+            <img src="{{ project.project_image.url }}" class="card-img-top" alt="{{ project.idea_name }}">
+            <div class="card-body">
+                <h5 class="card-title">{{ project.idea_name }}</h5>
+                <p class="card-text">{{ project.idea_description }}</p>
+                <p class="text-muted">Industry: {{ project.industry }}</p>
+                {% if project.website_link %}
+                    <a href="{{ project.website_link }}" class="btn btn-primary" target="_blank">Visit Website</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
         <!-- mid-section -->
         <section id="mid">
             <!-- left-side -->
-             <div class="left section">
+            <div class="left section">
                 <div class="user-section">
-                    <img src="{{ profile.profile_pics.url }}" alt="Profile Image" class="rounded-circle" width="100" height="auto">
-
+                    <img src="{{ profile.profile_pics.url|default:'' }}" 
+                         alt="Profile Image" class="rounded-circle" width="100" height="auto">
+            
                     <div>
                         <div class="user-name">
-                            <p>Name:<h4>{{ user.get_full_name }}</h4>
-                            </p>
+                            
+                            <p><strong>Name:</strong> {{ user.profile.full_name|default:user.get_full_name|default:"Not Provided" }}</p>
                             <button>
-                                <a href="{% url 'edit_profile' %}" class="btn btn-primary btn-sm">Edit</a>
+                                <a href="{% url 'profile' %}" class="btn btn-primary btn-sm">Edit</a>
                             </button>
                         </div>
                     </div>
                 </div>
-                <div class="user-about"><span>ABOUT:
-                    </span>{{ profile.bio|truncatewords:20 }}
+            
+                <div class="user-about">
+                    <span>ABOUT: </span>{{ profile.bio|default:"No bio available."|truncatewords:20 }}
                 </div>
+            
                 <div class="user-info">
                     <ul>
-                        <li>Profile views: {{ profile_views }}</li>
-                        <li>Connections: {{ connections_count }}</li>
-                        <li>Inventions: {{ inventions_count }}</li>
-                        <li>Patents: {{ patents_count }}</li>
-                        <li>Groups: {{ groups_count }}</li>
-                        <li>Pages: {{ pages_count }}</li>
-                        <li>Events: {{ events_count }}</li>
+                        <li>Profile views: {{ profile_views|default:"0" }}</li>
+                        <!-- <li>Connections: {{ connections_count|default:"0" }}</li> -->
+                        <li>Inventions: {{ inventions_count|default:"0" }}</li>
+                        <li>Patents: {{ patents_count|default:"0" }}</li>
+                        <li>Groups: {{ groups_count|default:"0" }}</li>
+                        <li>Pages: {{ pages_count|default:"0" }}</li>
+                        <li>Events: {{ events_count|default:"0" }}</li>
                     </ul>
                 </div>
+            
                 <div class="more-user-info">
-                    <p><strong>Company:</strong> {{ profile.company }}</p>
-                    <p><strong>Industry:</strong> {{ profile.industry }}</p>
+                    <p><strong>Company:</strong> {{ profile.company|default:"Not specified" }}</p>
+                    <p><strong>Industry:</strong> {{ profile.industry|default:"Not specified" }}</p>
                 </div>
-             </div>
-
-
+            </div>
 
             
             <!-- center-part -->
             <!-- Post Submission Form -->
             <div class="center section">
+                
                 <div class="post-section card">
-                    <form method="POST" action="{% url 'create_post' %}" enctype="multipart/form-data">
+                    <form method="POST" action="" enctype="multipart/form-data">
                         {% csrf_token %}
-                        <textarea name="content" placeholder="Post here..."></textarea>
+                
+                        <!-- Default placeholder text for textarea -->
+                        <textarea name="content" placeholder="Share your thoughts...">{% if request.POST.content %}{{ request.POST.content }}{% else %}Default post content...{% endif %}</textarea>
+                
                         <span>Industry:</span>
                         <select name="industry" id="industry">
-                            <option value="IT">IT</option>
+                            <option value="IT" selected>IT</option>
                             <option value="Medicine">Medicine</option>
                             <option value="Finance">Finance</option>
                             <option value="Business">Business</option>
                             <option value="Arts">Arts</option>
                             <option value="Agriculture">Agriculture</option>
                         </select>
+                
+                        <!-- File input with a label for better UX -->
+                        <label for="attachment">Attach a file:</label>
                         <input type="file" name="attachment">
+                
                         <button type="submit">Submit</button>
                     </form>
-
                 </div>
+                <!-- posts below -->
                 <!-- Display Posts -->
                 {% for post in posts %}
+                
+
                 <div class="idea-section card">
-                     <div class="top">
-                         <span>
-                             <button>...</button>
-                             <button>X</button>
-                         </span>
-                     </div>
-                     <div class="idea-info">
-                         
-                         <table>
-                             <tr>
-                                 <td>Connected 
+                    <div class="top">
+                        <span>
+                            <button>...</button>
+                            <button>X</button>
+                        </span>
+                    </div>
+                    <div class="idea-info">
+                        <table>
+                            <tr>
+                                <td>Connected 
                                     <span id="status">
-                                        {% for user in users %}
-                                            <div class="user">
-                                                <p>{{ user.username }}</p>
-                                                {% if user in request.user.following.all %}
-                                                <span class="following-dot"></span>
-                                                {% else %}
-                                                    <button class="not-following-button">Not Following</button>
+                                        {% if users %}
+                                            {% for user in users %}
+                                                <div class="user">
+                                                    <p>{{ user.username|default:"Unknown User" }}</p>
+                                                    {% if user in request.user.following.all %}
+                                                        <span class="following-dot"></span>
+                                                    {% else %}
+                                                        <button class="not-following-button">Not Following</button>
                                                     {% endif %}
+                                                </div>
+                                            {% endfor %}
+                                        {% else %}
+                                            <!-- Sample User -->
+                                            <div class="user">
+                                                <p>SampleUser123</p>
+                                                <span class="following-dot"></span>
                                             </div>
-                                        {% endfor %}
-                                        
+                                        {% endif %}
                                     </span>
                                 </td>
                                 <td>
-                                    <p><strong>{{ post.user.get_full_name }}</strong></p>
-                                    
+                                    <p><strong>{{ post.user.get_full_name|default:"John Doe" }}</strong></p>
                                 </td>
                             </tr>
                             <tr>
                                 <td>
-                                    <p><strong>Industry:</strong> {{ post.industry }}</p>
+                                    <p><strong>Industry:</strong> {{ post.industry|default:"Technology" }}</p>
                                 </td>
                                 <td>
-                                    <p>{{ post.created_at|timesince }} ago</p>
+                                    <p>{{ post.created_at|timesince|default:"5 minutes" }} ago</p>
                                 </td>
                             </tr>
                         </table>
-    
+                
                         <div class="idea-body">
-                            <span>Title1</span>
+                            <span>{{ post.title|default:"Innovative AI Project" }}</span>
                             <div class="idea-def">
-                                <p>{{ post.content }}</p>
-                                
+                                <p>{{ post.content|default:"This is a sample idea description that demonstrates how artificial intelligence is changing the world." }}</p>
                             </div>
                             <div class="interest-section">
-                                <span>Interests #</span>
-                                <span>Views #</span>
-                                <span>Repost #</span>
-                                <span>Likes #</span>
-    
+                                <span>Interests #{{ post.interest_count|default:"5" }}</span>
+                                <span>Views #{{ post.view_count|default:"120" }}</span>
+                                <span>Repost #{{ post.repost_count|default:"3" }}</span>
+                                <span>Likes #{{ post.like_count|default:"45" }}</span>
                             </div>
                         </div>
+                
                         <div class="idea-media-section">
                             {% if post.image %}
                                 <img src="{{ post.image.url }}" class="post-image">
+                            {% else %}
+                                <!-- Sample Image -->
+                                <img src="https://via.placeholder.com/400x200" class="post-image" alt="Sample Image">
                             {% endif %}
-    
                         </div>
+                
                         <div class="action-area">
                             <div class="idea-action1 small-card">
                                 <div class="area">
-                                    <span>Collaborations #</span>
-                                    <span>Proposal #</span>
-                                    <span>Pantent</span>
+                                    <span>Collaborations #{{ post.collaboration_count|default:"2" }}</span>
+                                    <span>Proposal #{{ post.proposal_count|default:"1" }}</span>
+                                    <span>Patent</span>
                                 </div>
-                                <div class="comment-section small-card">
-    
                             </div>
+                
                             <!-- Comments Section -->
                             <div class="comment-section small-card">
-                                <!-- <p><strong>Comments [Auto Scroll]</strong></p> -->
                                 <span>Comments # [Auto Scroll]</span>
-    
-                                {% for comment in post.comments.all %}
-                                    <p><strong>{{ comment.user.username }}</strong>: {{ comment.content }}</p>
-                                {% empty %}
-                                    <p>No comments yet.</p>
-                                {% endfor %}
-    
+                                {% if post.comments.all %}
+                                    {% for comment in post.comments.all %}
+                                        <p><strong>{{ comment.user.username|default:"Anonymous" }}</strong>: {{ comment.content|default:"No comment content." }}</p>
+                                    {% endfor %}
+                                {% else %}
+                                    <!-- Sample Comment -->
+                                    <p><strong>Commenter123</strong>: "This is an amazing idea! Can't wait to see more."</p>
+                                {% endif %}
+                
                                 <!-- Comment Form -->
                                 <form method="POST" action="{% url 'add_comment' post.id %}">
                                     {% csrf_token %}
-                                    <input type="text" name="content" placeholder="comment here...">
+                                    <input type="text" name="content" placeholder="Write a comment...">
                                     <button type="submit">Make Comment</button>
                                 </form>
                             </div>
                         </div>
                     </div>
                 </div>
+                
                 {% empty %}
                     <p>No posts available.</p>
                 {% endfor %}
+                
+
+
+                
+
+
 
                 <div class="that-viewed">
                     <h3>Who viewed your Profile</h3>
                     <div class="title-container">
                         <div class="tile">
-                            {% for view in recent_viewers %}
-                            <div class="viewer-card">
-                                <img src="{{ view.viewer.profile.image.url }}" alt="Profile Picture">
-                                <span>
-                                    <strong>{{ view.viewer.first_name }} {{ view.viewer.last_name }}</strong>
-    
-                                </span>
-                                <div class="tiles-about">
-                                    <p>{{ view.viewer.profile.bio|truncatewords:10 }}</p>
-    
+                            {% if recent_viewers %}
+                                {% for view in recent_viewers %}
+                                <div class="viewer-card">
+                                    <img src="{{ view.viewer.profile.image.url|default:'https://via.placeholder.com/100' }}" alt="Profile Picture">
+                
+                                    <span>
+                                        <strong>{{ view.viewer.first_name|default:"John" }} {{ view.viewer.last_name|default:"Doe" }}</strong>
+                                    </span>
+                
+                                    <div class="tiles-about">
+                                        <p>{{ view.viewer.profile.bio|truncatewords:10|default:"Entrepreneur interested in tech and startups." }}</p>
+                                    </div>
+                
+                                    <button>
+                                        <a href="{% url 'profile_view' view.viewer.username %}" class="connect-btn">Connect +</a>
+                                    </button>
                                 </div>
-                                
-                                <button>
-                                    <a href="{% url 'profile_view' view.viewer.username %}" class="connect-btn">Connect +</a>
-    
-                                </button>
-                            </div>
-                            {% empty %}
-                            <p>No recent profile viewers.</p>
-                            {% endfor %}
+                                {% endfor %}
+                            {% else %}
+                                <!-- Auto-Generated Sample Viewer -->
+                                <div class="viewer-card">
+                                    <img src="https://via.placeholder.com/100" alt="Sample Profile Picture">
+                                    <span><strong>Jane Smith</strong></span>
+                                    <div class="tiles-about">
+                                        <p>Innovative thinker exploring AI and entrepreneurship.</p>
+                                    </div>
+                                    <button>
+                                        <a href="#" class="connect-btn">Connect +</a>
+                                    </button>
+                                </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
+                
+                
                 <div class="suggestions-section card">
-                     <!-- Include Suggestions Section -->
-                        {% include '_partials/suggestions.html' %}
-    
+                    {% include '_partials/suggestions.html' %}
                 </div>
-            </div>
+                
+
+                <!-- old -->
+                
 
             </div>
             <div class="right section">
@@ -244,7 +295,6 @@
                     
                 </div>
                 
-
                 <span>Proposals</span>
                 <hr>
                 <div class="proposal-section">

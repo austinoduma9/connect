@@ -24,7 +24,12 @@ html{
         // background-color: #4d3d3d;
 
         .flash-message{
-            background-color: red;
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            padding: 5px;
+            border-radius: 10px;
+            background-color: rgb(0, 255, 106);
         }
         #navbar2{
             display: none;
@@ -462,6 +467,10 @@ html{
                     display: flex;
                     padding: 5px;
                     box-shadow: 1.5px 1.5px 2px 0px rgba(100, 100, 100, 0.404);
+                    button > * {
+                        color: #f8f8f8d3;
+                        text-decoration: unset;
+                    }
                     img{
                         width: 60px;
                         height: 60px;
@@ -592,21 +601,18 @@ html{
                     .tile{
                         flex-direction: column;
                         max-width: 85px;
+                        max-height: max-content;
                         align-items: center;
+                        // background-color: red;
                         // padding: 8px;
                         img{
                             //  max-width: 60px;
                             max-height: 100px;
-                            // min-height:40px;
-
-                            // max-width: unset;
+                            // min-height: 60px;
+                            min-height: 50px;
+            
                             min-width: 100%;
-                            // max-height: 100px;
-                            // min-height: 40px;
-                            // width: 100%;
-                            // transform: translateY(2px);
-                            // background-color: red;
-                            // z-index: 3;
+                          
                             -webkit-mask-image: linear-gradient(to bottom, black, transparent);
                             mask-image: linear-gradient (to bottom ,black, transparent);
     
@@ -624,6 +630,7 @@ html{
                         }
                     }
                  }
+                // }
                 .right-section{
                     display: flex;
                     flex-direction: column;
@@ -646,9 +653,7 @@ html{
                             img{
                                 max-width: 100px;
                                 -webkit-mask-image: linear-gradient(to right, black, transparent);
-                                mask-image: linear-gradient (to right ,black, transparent);
-        
-                               
+                                mask-image: linear-gradient (to right ,black, transparent); 
                             }
                             img:hover{
                                 transform: translateX(-2px);
@@ -656,12 +661,17 @@ html{
                                 z-index: 3;
 
                             }
-                            .titles-about{
-                                overflow: hidden;
-                                display: -webkit-box;
-                                -webkit-box-orient: vertical;
-                                -webkit-line-clamp: 3;
-                                line-height: 10px;
+                            div{
+                                // background-color: salmon;
+                                .titles-about{
+                                    overflow: hidden;
+                                    display: -webkit-box;
+                                    -webkit-box-orient: vertical;
+                                    -webkit-line-clamp: 3;
+                                    line-height: 10px;
+                                    // background-color: #005050;
+                                }
+
                             }
                         }
                     }

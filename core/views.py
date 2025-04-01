@@ -1,54 +1,32 @@
 
 
-from .models import CustomUser, Idea, InvestorInterest, Event, Connection, Company
+from .models import CustomUser, Company
 
-from .forms import CustomUserCreationForm, IdeaForm, EventForm
+from .forms import CustomUserCreationForm
 
-from .models import Event
-from .forms import EventForm
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-
-
-from .models import Profile, Connection, Invention, Patent, Group, Page, Event
-from .models import InvestorProposal
-
+from .models import Profile,  Group, Page
 from .models import Post, Comment
-from .forms import PostForm, CommentForm
-from .models import ProfileView
-
-
 from django.db.models import Q
-from .models import Post, Idea, Topic, Inventor, Industry
-
-
+from .models import Post
 from django.core.mail import send_mail
 from django.contrib import messages
 from .forms import ContactForm
-
-# from .views import contact
-# from core.forms import ProfileEditForm
-# from oduma_platform.core.forms import ProfileEditForm
+from .models import Project
+from .forms import ProjectForm
+from django.utils.timezone import now
+from .forms import CustomLoginForm
 
 ##proposals
-@login_required
-def investor_proposals(request):
-    proposals = InvestorProposal.objects.filter(post__user=request.user)
-    return render(request, "proposals.html", {"proposals": proposals})
 
-def investor_proposals(request):
-    proposals = InvestorProposal.objects.all().order_by("-timestamp")
-    return render(request, "proposals.html", {"proposals": proposals})
 
 
 ##user posts
-@login_required
-def user_posts(request):
-    user_posts = Post.objects.filter(user=request.user).order_by("-created_at")
-    return render(request, "user_posts.html", {"user_posts": user_posts})
+
 
 ##edit profile
 @login_required
@@ -63,8 +41,33 @@ def edit_profile(request):
     else:
         form = ProfileEditForm(instance=user)
 
-    return render(request, "edit_profile.html", {"form": form})
+    return render(request, "profile.html", {"form": form})
 
+
+##profile page
+
+@login_required
+def profile_view(request):
+    profile, created = Profile.objects.get_or_create(user=request.user)
+    # profile = Profile.objects.get(user=request.user)  # Fetch the profile for logged-in user
+
+    context = {
+        'profile': profile,
+        'profile_views': profile.profile_views if profile.profile_views else 0,
+        # 'inventions_count': profile.inventions.count() if profile.inventions else 0,
+        # 'patents_count': profile.patents.count() if profile.patents else 0,
+        # 'groups_count': profile.groups.count() if profile.groups else 0,
+        # 'pages_count': profile.pages.count() if profile.pages else 0,
+        # 'events_count': profile.events.count() if profile.events else 0,
+    }
+    # return render(request, 'profile.html', context)
+    return render(request, 'profile.html', {'user': request.user, 'profile': profile})
+
+##############
+###############
+
+
+##view user app
 @login_required
 def app_view(request):
     user = request.user  # Get logged-in user
@@ -75,100 +78,32 @@ def app_view(request):
     context = {
         "user": user,
         "profile": profile,
-        "profile_views": profile.views_count,  # Assuming a field exists
-        "connections_count": Connection.objects.filter(user=user).count(),
-        "inventions_count": Invention.objects.filter(user=user).count(),
-        "patents_count": Patent.objects.filter(user=user).count(),
+        # "profile_views": profile.views_count,  # Assuming a field exists
+        # "connections_count": Connection.objects.filter(user=user).count(),
+        # "inventions_count": Invention.objects.filter(user=user).count(),
+        # "patents_count": Patent.objects.filter(user=user).count(),
         "groups_count": Group.objects.filter(members=user).count(),
         "pages_count": Page.objects.filter(owner=user).count(),
-        "events_count": Event.objects.filter(organizer=user).count(),
+        # "events_count": Event.objects.filter(organizer=user).count(),
     }
     
     return render(request, "app.html", context)
 
 
 
-
-
-
 ##post list
-def post_list(request):
-    posts = Post.objects.all().order_by("-created_at")
-    post_form = PostForm()
-    comment_form = CommentForm()
-    
-    return render(request, "post_list.html", {
-        "posts": posts,
-        "post_form": post_form,
-        "comment_form": comment_form
-    })
+
 
 ##create post
-def create_post(request):
-    if request.method == "POST":
-        form = PostForm(request.POST, request.FILES)
-        if form.is_valid():
-            post = form.save(commit=False)
-            post.user = request.user
-            post.save()
-            return redirect("post_list")
-    return redirect("post_list")
-
-def add_comment(request, post_id):
-    if request.method == "POST":
-        form = CommentForm(request.POST)
-        if form.is_valid():
-            comment = form.save(commit=False)
-            comment.user = request.user
-            comment.post_id = post_id
-            comment.save()
-    return redirect("post_list")
-
 
 
 ##track user visitors
 
-def profile_view(request, username):
-    viewed_user = get_object_or_404(CustomUser, username=username)
 
-    # Track profile visit (but not if user views their own profile)
-    if request.user.is_authenticated and request.user != viewed_user:
-        ProfileView.objects.update_or_create(viewer=request.user, viewed=viewed_user)
-
-    # Fetch recent profile viewers
-    recent_viewers = ProfileView.objects.filter(viewed=viewed_user).select_related("viewer")[:10]
-
-    return render(request, "profile.html", {
-        "viewed_user": viewed_user,
-        "recent_viewers": recent_viewers
-    })
 
 
 ##fetch data from suggestions
 
-
-# def suggestions_view(request):
-#     user = request.user
-
-#     # 1️⃣ Node Suggestions: Random users (excluding current user and existing connections)
-#     connected_users = Connection.objects.filter(user=user).values_list("connected_user", flat=True)
-#     node_suggestions = CustomUser.objects.exclude(id__in=[user.id] + list(connected_users))[:6]
-
-#     # 2️⃣ Companies to Look At: Fetch random companies
-#     companies = Company.objects.all()[:6]
-
-#     # 3️⃣ Nodes in Your Community: Fetch users with common connections
-#     community_nodes = CustomUser.objects.filter(connections_received__user=user).exclude(id=user.id)[:6]
-
-#     # 4️⃣ Profile-Based Suggestions: Fetch companies based on user's industry
-#     profile_based_companies = Company.objects.filter(industry=user.profile.industry)[:6]
-
-#     return render(request, "suggestions.html", {
-#         "node_suggestions": node_suggestions,
-#         "companies": companies,
-#         "community_nodes": community_nodes,
-#         "profile_based_companies": profile_based_companies
-#     })
 
 
 ##part 2 suggestions
@@ -178,30 +113,26 @@ def home_view(request):
     user = request.user
 
     # Fetch Node Suggestions
-    connected_users = Connection.objects.filter(user=user).values_list("connected_user", flat=True)
-    node_suggestions = User.objects.exclude(id__in=[user.id] + list(connected_users))[:6]
+    # connected_users = Connection.objects.filter(user=user).values_list("connected_user", flat=True)
+    # node_suggestions = CustomUser.objects.exclude(id__in=[user.id] + list(connected_users))[:6]
 
     # Fetch Companies
     companies = Company.objects.all()[:6]
 
     # Fetch Nodes in Community
-    community_nodes = User.objects.filter(connections_received__user=user).exclude(id=user.id)[:6]
+    community_nodes = CustomUser.objects.filter(connections_received__user=user).exclude(id=user.id)[:6]
 
     # Fetch Profile-Based Companies
     profile_based_companies = Company.objects.filter(industry=user.profile.industry)[:6]
 
     return render(request, "app.html", {
-        "node_suggestions": node_suggestions,
+        # "node_suggestions": node_suggestions,
         "companies": companies,
         "community_nodes": community_nodes,
         "profile_based_companies": profile_based_companies
     })
 
-
-
-
-
-# Views
+# Views pages
 ##index.html
 def index(request):
     # context = {"page_title": "Home"}
@@ -239,21 +170,154 @@ def notifications(request):
     context = {"page_title": "Notifications", "page_name": "Notifications"}
     return render(request, 'notifications.html', context)
 
+##inventor_page.html
+def inventor_page(request):
+    context = {"page_title": "Inventor_page", "page_name": "Inventor_page"}
+    return render(request, 'inventor_page.html', context)
+##contact
+def contact(request):
+    context = {"page_title": "contact", "page_name": "contact"}
+    return render(request, 'contact.html', context)
+
 ##app.html
 def app_view(request):
     context = {"page_title": "App Center"}
     return render(request, 'app.html', context)
 
 ##event.html
-def add_event(request):
-    if request.method == 'POST':
-        form = EventForm(request.POST)
+
+
+
+##post_list
+
+from django.shortcuts import render, redirect
+from .models import Post
+from .forms import PostForm  # Ensure you have imported your PostForm
+
+
+def post_list(request):
+    context = {"page_title": "Posts", "page_name": "Posts"}  # ✅ Always initialize context
+    form = PostForm(request.POST or None, request.FILES or None)  # ✅ Initialize form at the start
+
+    if request.method == "POST":
+        if form.is_valid():
+            post = form.save(commit=False)  # ✅ Don't save yet
+            post.user = request.user  # ✅ Assign the logged-in user
+            post.save()  # ✅ Save to DB
+            return redirect("post_list")  # ✅ Redirect to avoid duplicate submissions
+
+    posts = Post.objects.all().order_by("-created_at")  # ✅ Fetch posts from newest to oldest
+    context["posts"] = posts
+    context["form"] = form
+
+    return render(request, "post_list.html", context)  # ✅ Pass the context correctly
+
+
+
+##intentor page
+
+def dashboard(request):
+    user_ideas = Project.objects.filter(user=request.user)
+    if request.method == "POST":
+        form = ProjectForm(request.POST, request.FILES)
+        if form.is_valid():
+            project = form.save(commit=False)
+            project.user = request.user
+            project.save()
+            return redirect('dashboard')  # Redirect to refresh the page
+    
+    else:
+        form = ProjectForm()
+    
+    context = {
+        'form': form,
+        'user_ideas': user_ideas,
+        # 'events': events,
+    }
+    return render(request, 'dashboard.html', context)
+
+##inventor page inputs
+def inventor_page(request):
+    user_ideas = Project.objects.filter(user=request.user)
+    if request.method == "POST":
+        form = ProjectForm(request.POST, request.FILES)
+        if form.is_valid():
+            project = form.save(commit=False)
+            project.user = request.user
+            project.save()
+            return redirect('inventor_page')  # Redirect to refresh the page
+    
+    else:
+        form = ProjectForm()
+        footer_message = "Thanks for visiting your inventor page! Keep innovating!"
+        context = {
+            'form': form,
+            'user_ideas': user_ideas,
+            'footer_message': footer_message
+            # 'events': events,
+        }
+    return render(request, 'inventor_page.html', context)
+
+###Edit Project
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Project
+from .forms import ProjectForm
+
+# Edit Project
+def edit_project(request, project_id):
+    project = get_object_or_404(Project, id=project_id)
+    
+    if request.method == "POST":
+        form = ProjectForm(request.POST, request.FILES, instance=project)
         if form.is_valid():
             form.save()
-            return redirect('event_list')
+            return redirect('inventor_page')  # Redirect back to the inventor page
     else:
-        form = EventForm()
-    return render(request, 'add_event.html', {'form': form})
+        form = ProjectForm(instance=project)
+
+    context = {
+        'form': form,
+        'project': project,
+    }
+    return render(request, 'edit_project.html', context)
+
+# Delete Project
+def delete_project(request, project_id):
+    project = get_object_or_404(Project, id=project_id)
+    if request.method == "POST":
+        project.delete()
+        return redirect('inventor_page')  # Redirect back to the inventor page
+    return render(request, 'confirm_delete.html', {'project': project})
+
+
+#####Edit from dashboard
+def edit_project(request, project_id):
+    project = get_object_or_404(Project, id=project_id)
+    
+    if request.method == "POST":
+        form = ProjectForm(request.POST, request.FILES, instance=project)
+        if form.is_valid():
+            form.save()
+            return redirect('inventor_page')  # Redirect back to the inventor page
+    else:
+        form = ProjectForm(instance=project)
+
+    context = {
+        'form': form,
+        'project': project,
+    }
+    return render(request, 'inventor_page.html', context)
+
+# Delete Project
+def delete_project(request, project_id):
+    project = get_object_or_404(Project, id=project_id)
+    if request.method == "POST":
+        project.delete()
+        return redirect('dashboard')  # Redirect back to the inventor page
+    return render(request, 'confirm_delete.html', {'project': project})
+
+
+
 
 
 # User Registration
@@ -265,7 +329,7 @@ def register(request):
             user = form.save()
             login(request, user)
             messages.success(request, "Registration successful!")
-            return redirect("dashboard")
+            return redirect("app")
         else:
             messages.error(request, "Registration failed. Please check your details.")
     else:
@@ -281,10 +345,26 @@ def login_view(request):
         if user:
             login(request, user)
             messages.success(request, "Login successful!")
-            return redirect("dashboard")
+            return redirect("app")
         else:
             messages.error(request, "Invalid credentials, try again.")
     return render(request, "login.html")
+
+
+
+def login_view(request):
+    form = CustomLoginForm(data=request.POST or None)
+    
+    if request.method == "POST":
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            messages.success(request, "Login successful!")
+            return redirect('app')  # Redirect to a  home page
+        else:
+            messages.error(request, "Invalid credentials, try again.")
+
+    return render(request, 'login.html', {'form': form})
 
 # User Logout
 @login_required
@@ -294,94 +374,43 @@ def logout_view(request):
     return redirect("login")
 
 # User Dashboard
-@login_required
-def dashboard(request):
-    user_ideas = Idea.objects.filter(created_by=request.user)
-    events = Event.objects.all().order_by("-date")[:5]
-    return render(request, "dashboard.html", {"user_ideas": user_ideas, "events": events} )
+# @login_required
+# def dashboard(request):
+#     user_ideas = Idea.objects.filter(created_by=request.user)
+#     events = Event.objects.all().order_by("-date")[:5]
+#     return render(request, "dashboard.html", {"user_ideas": user_ideas, "events": events} )
 
 # User Profile
-@login_required
-def profile(request, username):
-    user = get_object_or_404(CustomUser, username=username)
-    user_ideas = Idea.objects.filter(created_by=user)
-    return render(request, "profile.html", {"profile_user": user, "user_ideas": user_ideas})
-
-# Submit an Idea
-@login_required
-def submit_idea(request):
-    if request.method == "POST":
-        form = IdeaForm(request.POST)
-        if form.is_valid():
-            idea = form.save(commit=False)
-            idea.created_by = request.user
-            idea.save()
-            messages.success(request, "Idea submitted successfully!")
-            return redirect("dashboard")
-    else:
-        form = IdeaForm()
-    return render(request, "ideas/submit_idea.html", {"form": form})
-
-@login_required
-def create_idea(request):
-    if request.method == 'POST':
-        form = IdeaForm(request.POST, request.FILES)
-        if form.is_valid():
-            idea = form.save(commit=False)
-            idea.user = request.user
-            idea.save()
-            return redirect('dashboard')  # Redirect to a dashboard or another page
-    else:
-        form = IdeaForm()
-    return render(request, 'create_post.html', {'form': form})
 
 
 
 # Investor Expresses Interest in an Idea
-@login_required
-def express_interest(request, idea_id):
-    idea = get_object_or_404(Idea, id=idea_id)
-    if request.user.user_type == "investor":
-        existing_interest = InvestorInterest.objects.filter(investor=request.user, idea=idea).exists()
-        if not existing_interest:
-            InvestorInterest.objects.create(investor=request.user, idea=idea)
-            messages.success(request, "Interest registered successfully!")
-        else:
-            messages.warning(request, "You have already shown interest in this idea.")
-    else:
-        messages.error(request, "Only investors can express interest.")
-    return redirect("dashboard")
+
 
 # Event Listing
-def event_list(request):
-    events = Event.objects.all().order_by("-date")
-    return render(request, "events/event_list.html", {"events": events})
+
 
 # Send Connection Request
-@login_required
-def send_connection_request(request, user_id):
-    receiver = get_object_or_404(CustomUser, id=user_id)
-    if request.user != receiver:
-        existing_request = Connection.objects.filter(sender=request.user, receiver=receiver).exists()
-        if not existing_request:
-            Connection.objects.create(sender=request.user, receiver=receiver, status="pending")
-            messages.success(request, "Connection request sent!")
-        else:
-            messages.warning(request, "You have already sent a request to this user.")
-    return redirect("dashboard")
+
 
 # Manage Connection Requests (Accept/Reject)
-@login_required
-def manage_connection_request(request, request_id, action):
-    connection = get_object_or_404(Connection, id=request_id, receiver=request.user)
-    if action == "accept":
-        connection.status = "accepted"
-        messages.success(request, "Connection request accepted!")
-    elif action == "reject":
-        connection.status = "rejected"
-        messages.info(request, "Connection request rejected.")
-    connection.save()
-    return redirect("dashboard")
+
+
+
+##create Project
+
+def create_project(request):
+    if request.method == "POST":
+        form = ProjectForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()  # Saves to SQLite
+            return redirect("dashboard")  # Update with your actual dashboard URL
+        else:
+            print(form.errors)  # Debugging: Show errors if form fails to save
+    else:
+        form = ProjectForm()
+
+    return render(request, "create_project.html", {"form": form})
 
 
 
@@ -393,25 +422,26 @@ def search(request):
 
     if query:
         results.extend(Post.objects.filter(Q(title__icontains=query) | Q(content__icontains=query)))
-        results.extend(Idea.objects.filter(Q(title__icontains=query) | Q(description__icontains=query)))
-        results.extend(Topic.objects.filter(name__icontains=query))
-        results.extend(Inventor.objects.filter(Q(name__icontains=query) | Q(bio__icontains=query)))
-        results.extend(Industry.objects.filter(Q(name__icontains=query) | Q(description__icontains=query)))
+        # results.extend(Idea.objects.filter(Q(title__icontains=query) | Q(description__icontains=query)))
+        # results.extend(Topic.objects.filter(name__icontains=query))
+        # results.extend(Inventor.objects.filter(Q(name__icontains=query) | Q(bio__icontains=query)))
+        # results.extend(Industry.objects.filter(Q(name__icontains=query) | Q(description__icontains=query)))
         results.extend(Post.objects.filter(Q(content__icontains=query))) 
 
     return render(request, 'search_results.html', {'query': query, 'results': results})
 
-# @login_required
-# def post_list(request):
-#     return render(request, "posts/post_list.html")
-
-@login_required
-def create_post(request):
-    # Your form processing logic...
-    return redirect("post_list")
+##feedback form
 
 
+###
+import logging
+from django.http import JsonResponse
+from django.core.mail import send_mail
+from django.contrib import messages
+from django.shortcuts import render
+from .forms import ContactForm
 
+logger = logging.getLogger(__name__)
 
 def contact(request):
     if request.method == "POST":
@@ -421,15 +451,20 @@ def contact(request):
             email = form.cleaned_data['email']
             message = form.cleaned_data['message']
 
-            # Example: Send an email (optional)
-            send_mail(
-                subject=f"Contact Form Message from {name}",
-                message=message,
-                from_email=email,
-                recipient_list=["odumacorp@gmail.com"],  # Change to your email
-            )
+            logger.info(f"Received contact form: Name={name}, Email={email}, Message={message}")
 
-            messages.success(request, "Your message has been sent successfully!")
+            try:
+                send_mail(
+                    subject=f"Contact Form Message from {name}",
+                    message=message,
+                    from_email=email,
+                    recipient_list=["odumacorp@gmail.com"],
+                )
+                messages.success(request, "Your message has been sent successfully!")
+            except Exception as e:
+                logger.error(f"Email sending failed: {e}")
+                messages.error(request, "There was an error sending your message.")
+            
             form = ContactForm()  # Clear the form after submission
         else:
             messages.error(request, "There was an error with your submission.")
@@ -437,3 +472,4 @@ def contact(request):
         form = ContactForm()
 
     return render(request, "contact.html", {"form": form})
+

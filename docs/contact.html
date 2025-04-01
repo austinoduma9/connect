@@ -1,27 +1,14 @@
-{% extends "base.html" %}
+{% extends '_partials/base.html' %}
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Submit</button>
+</form>
 
-{% block content %}
-<section>
-    <h2>Get in Touch</h2>
-    
-    {% if messages %}
+{% if messages %}
+    <ul>
         {% for message in messages %}
-            <p class="{{ message.tags }}">{{ message }}</p>
+            <li>{{ message }}</li>
         {% endfor %}
-    {% endif %}
-    
-    <form method="post">
-        {% csrf_token %}
-        <label for="id_name">Name:</label>
-        {{ form.name }}
-        
-        <label for="id_email">Email:</label>
-        {{ form.email }}
-        
-        <label for="id_message">Message:</label>
-        {{ form.message }}
-
-        <button type="submit" class="submit-button">Submit</button>
-    </form>
-</section>
-{% endblock %}
+    </ul>
+{% endif %}

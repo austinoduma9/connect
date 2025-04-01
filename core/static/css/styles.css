@@ -16,7 +16,12 @@ html body {
   overflow-x: hidden;
 }
 html body .flash-message {
-  background-color: red;
+  position: absolute;
+  top: 5px;
+  right: 10px;
+  padding: 5px;
+  border-radius: 10px;
+  background-color: rgb(0, 255, 106);
 }
 html body #navbar2 {
   display: none;
@@ -438,6 +443,10 @@ html .container #mid .card .tile {
   padding: 5px;
   box-shadow: 1.5px 1.5px 2px 0px rgba(100, 100, 100, 0.404);
 }
+html .container #mid .card .tile button > * {
+  color: rgba(248, 248, 248, 0.8274509804);
+  text-decoration: unset;
+}
 html .container #mid .card .tile img {
   width: 60px;
   height: 60px;
@@ -549,10 +558,13 @@ html .container #mid .suggestions-section .left-section .tile-container span:nth
 html .container #mid .suggestions-section .left-section .tile {
   flex-direction: column;
   max-width: 85px;
+  max-height: -moz-max-content;
+  max-height: max-content;
   align-items: center;
 }
 html .container #mid .suggestions-section .left-section .tile img {
   max-height: 100px;
+  min-height: 50px;
   min-width: 100%;
   -webkit-mask-image: linear-gradient(to bottom, black, transparent);
   mask-image: linear-gradient to bottom, black, transparent;
@@ -595,7 +607,7 @@ html .container #mid .suggestions-section .right-section .tile-container .tile i
   transform: translateX(-2px);
   z-index: 3;
 }
-html .container #mid .suggestions-section .right-section .tile-container .tile .titles-about {
+html .container #mid .suggestions-section .right-section .tile-container .tile div .titles-about {
   overflow: hidden;
   display: -webkit-box;
   -webkit-box-orient: vertical;

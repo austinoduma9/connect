@@ -3,22 +3,122 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
-from django.contrib.auth import get_user_model
+# from django.contrib.auth import get_user_model
+from django.contrib.auth.models import User
 
+
+
+##Profile page
+
+class Profile(models.Model):
+    # user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE) 
+    profile_pics = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
+    bio = models.TextField(blank=True, null=True)
+    company = models.CharField(max_length=255, blank=True, null=True)
+    industry = models.CharField(max_length=255, blank=True, null=True)
+    profile_views = models.IntegerField(default=0)
+    inventions = models.ManyToManyField('Invention', blank=True)
+    patents = models.ManyToManyField('Patent', blank=True)
+    groups = models.ManyToManyField('Group', blank=True)
+    pages = models.ManyToManyField('Page', blank=True)
+    events = models.ManyToManyField('Event', blank=True)
+
+    def __str__(self):
+        # return self.user.username
+        return self.user.get_full_name() or self.user.username
+        # return self.user.get_full_name() or '_'.join([part.capitalize() for part in self.user.username.split('_')])
+
+    
+class Invention(models.Model):
+    name = models.CharField(max_length=255)
+    description = models.TextField()
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+class Patent(models.Model):
+    title = models.CharField(max_length=255)
+    invention = models.ForeignKey(Invention, on_delete=models.CASCADE)
+    date_filed = models.DateField()
+
+class Event(models.Model):
+    name = models.CharField(max_length=255)
+    date = models.DateField()
+    location = models.CharField(max_length=255)
 
 # User model with Investor/Innovator roles
 class CustomUser(AbstractUser):
     USER_TYPES = (
         ('innovator', 'Innovator'),
         ('investor', 'Investor'),
+        ('Admin', 'Admin'),
     )
     user_type = models.CharField(max_length=10, choices=USER_TYPES)
     bio = models.TextField(blank=True, null=True)
-    profile_picture = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
+    profile_picture = models.ImageField(upload_to='images/', blank=True, null=True)
 
     def __str__(self):
         return self.username
+
+##intentor page
+# class Project(models.Model):
+#     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE) 
+#     title = models.CharField(max_length=255)
+#     description = models.TextField()
+#     industry = models.CharField(max_length=100, choices=[
+#         ("tech", "Technology"),
+#         ("health", "Healthcare"),
+#         ("finance", "Finance"),
+#         ("education", "Education"),
+#         ("energy", "Energy"),
+#     ])
+#     project_image = models.ImageField(upload_to="images/", blank=True, null=True)
+#     website_link = models.URLField(blank=True, null=True)
     
+#     def __str__(self):
+#         return self.title
+    
+##
+from django.conf import settings
+from django.db import models
+
+class Project(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        on_delete=models.CASCADE, 
+        default=1  # Default to the user with ID=1, adjust as needed
+    )
+    title = models.CharField(
+        max_length=255, 
+        default="Untitled Project"
+    )
+    description = models.TextField(
+        default="No description provided."
+    )
+    industry = models.CharField(
+        max_length=100, 
+        choices=[
+            ("tech", "Technology"),
+            ("health", "Healthcare"),
+            ("finance", "Finance"),
+            ("education", "Education"),
+            ("energy", "Energy"),
+        ],
+        default="tech"  # Default to 'Technology'
+    )
+    project_image = models.ImageField(
+        upload_to="images/", 
+        blank=True, 
+        null=True,
+        default='images/default.jpg'  # Assuming a default image exists at this location
+    )
+    website_link = models.URLField(
+        blank=True, 
+        null=True, 
+        default="http://www.example.com"  # Default to an example website
+    )
+    
+    def __str__(self):
+        return self.title
 
 
 
@@ -26,138 +126,42 @@ class CustomUser(AbstractUser):
 class MyModel(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
 
-# Model for entrepreneurial ideas
-class Idea(models.Model):
-    CATEGORY_CHOICES = [
-        ('tech', 'Technology'),
-        ('health', 'Healthcare'),
-        ('finance', 'Finance'),
-        ('education', 'Education'),
-        ('other', 'Other'),
-    ]
-    title = models.CharField(max_length=255)
-    description = models.TextField()
-    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
-    created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="ideas")
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.title
-
-# Model for investors showing interest in ideas
-class InvestorInterest(models.Model):
-    investor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, limit_choices_to={'user_type': 'investor'})
-    idea = models.ForeignKey(Idea, on_delete=models.CASCADE)
-    message = models.TextField(blank=True)
-    timestamp = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ('investor', 'idea')
-
-    def __str__(self):
-        return f"{self.investor.username} interested in {self.idea.title}"
 
 # Model for networking connections
-#Default entry
-CustomUser = get_user_model()
-class Connection(models.Model):
-    sender = models.ForeignKey(CustomUser, related_name='sent_requests', on_delete=models.CASCADE)
-    receiver = models.ForeignKey(CustomUser, related_name='received_requests', on_delete=models.CASCADE)
-    status = models.CharField(max_length=10, choices=[('pending', 'Pending'), ('accepted', 'Accepted'), ('rejected', 'Rejected')], default='pending')
-    created_at = models.DateTimeField(auto_now_add=True)
-    connected_user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, default=1)  # Replace 1 with a valid user ID
 
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="connections_made", default=1)
-#     connected_user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="connections_received")
-
-    class Meta:
-        unique_together = ("user", "connected_user")  # No duplicate connections
-
-    def __str__(self):
-        return f"{self.user.username} connected with {self.connected_user.username}"
 
 # Model for listing events
-class Event(models.Model):
-    name = models.CharField(max_length=255)
-    # description = models.TextField()
-    date = models.DateTimeField()
-    # location = models.CharField(max_length=255)
-    created_by = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="events")
-    created_at = models.DateTimeField(auto_now_add=True)
-    organizer = models.ForeignKey(CustomUser, on_delete=models.CASCADE , default=1)
-    description = models.TextField(blank=True, null=True)  # Add this if missing
-    location = models.CharField(max_length=255, blank=True, null=True)  # Add this if missing
-
-
-    def __str__(self):
-        return self.name
     
 
 
-#Model for profile
-class Profile(models.Model):
-    # user = models.OneToOneField(User, on_delete=models.CASCADE)
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
-    bio = models.TextField(blank=True)
-    profile_image = models.ImageField(upload_to='profile/', default='default.jpg')
-    company = models.CharField(max_length=255, blank=True)
-    industry = models.CharField(max_length=255, blank=True)
-    views_count = models.PositiveIntegerField(default=0)  # Track profile views
+##patent model
 
-    def __str__(self):
-        return self.user.username
-
-class Invention(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    title = models.CharField(max_length=255)
-    description = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.title
-    
-
-
-# class Connection(models.Model):
-#     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-#     connected_user = models.ForeignKey(CustomUser, related_name="connections", on_delete=models.CASCADE)
-#     status = models.CharField(max_length=20, choices=[('pending', 'Pending'), ('accepted', 'Accepted')])
-    
-
-
-class Patent(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
-    name = models.CharField(max_length=255)
-    patent_number = models.CharField(max_length=100)
-    
+##user groups    
 class Group(models.Model):
     name = models.CharField(max_length=255)
     members = models.ManyToManyField(CustomUser)
-
+##user page
 class Page(models.Model):
     owner = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
 
 # 
 
-
-class InvestorProposal(models.Model):
-    investor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    about = models.TextField()
-    interests = models.IntegerField(default=0)
-    views = models.IntegerField(default=0)
-    reposts = models.IntegerField(default=0)
-    likes = models.IntegerField(default=0)
-    image = models.ImageField(upload_to="proposals/", default="default_proposal.jpg")
-    timestamp = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"Proposal by {self.investor.username}"
-    
-
 ##posts
+
+from django.contrib.auth import get_user_model
+from django.core.exceptions import ObjectDoesNotExist
+
+def get_default_user():
+    User = get_user_model()
+    try:
+        return User.objects.first().id  # Returns the first user in the database
+    except ObjectDoesNotExist:
+        return None  # Avoids migration issues if no users exist yet
+
 class Post(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    # user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, default=get_default_user )
     industry = models.CharField(max_length=255, choices=[("IT", "IT"), ("Medicine", "Medicine"), ("Finance", "Finance")])  # Add more industries as needed
     content = models.TextField()
     image = models.ImageField(upload_to="posts/", blank=True, null=True)
@@ -167,6 +171,7 @@ class Post(models.Model):
 
     def __str__(self):
         return f"Post by {self.user.username} - {self.industry}"
+    
 
 
 ##comments
@@ -177,23 +182,11 @@ class Comment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Comment by {self.user.username} on {self.post.id}"
+        return self.title
     
 
 ##Who viewed your profile
-class ProfileView(models.Model):
-    viewer = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="profile_views_made")
-    viewed = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="profile_views_received")
-    timestamp = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = ["-timestamp"]
-        unique_together = ("viewer", "viewed")  # Prevent duplicate views from the same user
-
-    def __str__(self):
-        return f"{self.viewer.username} viewed {self.viewed.username}'s profile"
     
-
 
 ##companies that viewed your profile
 
@@ -208,25 +201,3 @@ class Company(models.Model):
 
 
 ##followers
-class Follow(models.Model):
-    follower = models.ForeignKey(CustomUser, related_name='following', on_delete=models.CASCADE)
-    followed = models.ForeignKey(CustomUser, related_name='followers', on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ('follower', 'followed')
-
-    def __str__(self):
-        return f"{self.follower.username} follows {self.followed.username}"
-    
-
-class Topic(models.Model):
-    name = models.CharField(max_length=255)
-
-class Inventor(models.Model):
-    name = models.CharField(max_length=255)
-    bio = models.TextField()
-
-class Industry(models.Model):
-    name = models.CharField(max_length=255)
-    description = models.TextField()
